@@ -1,3 +1,19 @@
+diff -Naur a/arch/x86/include/asm/kvm_host.h b/arch/x86/include/asm/kvm_host.h
+--- a/arch/x86/include/asm/kvm_host.h	2025-07-30 16:32:34.651432368 +0530
++++ b/arch/x86/include/asm/kvm_host.h	2025-07-30 16:33:56.850206296 +0530
+@@ -229,6 +229,12 @@
+ #define DR6_BS		(1 << 14)
+ #define DR6_BT		(1 << 15)
+ #define DR6_RTM		(1 << 16)
++
++#define DR6_B0          (1ULL << 0)
++#define DR6_B1          (1ULL << 1)
++#define DR6_B2          (1ULL << 2)
++#define DR6_B3          (1ULL << 3)
++
+ /*
+  * DR6_ACTIVE_LOW combines fixed-1 and active-low bits.
+  * We can regard all the bits in DR6_FIXED_1 as active_low bits;
 diff -Naur a/arch/x86/kvm/x86.c b/arch/x86/kvm/x86.c
 --- a/arch/x86/kvm/x86.c	2025-07-29 04:51:17.758118729 +0530
 +++ b/arch/x86/kvm/x86.c	2025-07-29 04:54:16.061437914 +0530
