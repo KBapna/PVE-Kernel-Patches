@@ -19,22 +19,6 @@ diff -Naur a/arch/Kconfig b/arch/Kconfig
  	depends on HAVE_ARCH_MMAP_RND_COMPAT_BITS
  	help
  	  This value can be used to select the number of bits to use to
-diff -Naur a/arch/x86/include/asm/kvm_host.h b/arch/x86/include/asm/kvm_host.h
---- a/arch/x86/include/asm/kvm_host.h	2025-07-30 16:32:34.651432368 +0530
-+++ b/arch/x86/include/asm/kvm_host.h	2025-07-30 16:33:56.850206296 +0530
-@@ -229,6 +229,12 @@
- #define DR6_BS		(1 << 14)
- #define DR6_BT		(1 << 15)
- #define DR6_RTM		(1 << 16)
-+
-+#define DR6_B0          (1ULL << 0)
-+#define DR6_B1          (1ULL << 1)
-+#define DR6_B2          (1ULL << 2)
-+#define DR6_B3          (1ULL << 3)
-+
- /*
-  * DR6_ACTIVE_LOW combines fixed-1 and active-low bits.
-  * We can regard all the bits in DR6_FIXED_1 as active_low bits;
 diff -Naur a/arch/x86/include/asm/vdso/processor.h b/arch/x86/include/asm/vdso/processor.h
 --- a/arch/x86/include/asm/vdso/processor.h	2025-07-30 16:32:34.659432346 +0530
 +++ b/arch/x86/include/asm/vdso/processor.h	2025-07-30 16:33:56.850206296 +0530
