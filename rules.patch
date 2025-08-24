@@ -1,0 +1,12 @@
+--- a/rules	2025-08-24 04:33:47.896444099 +0530
++++ b/rules	2025-08-24 04:33:39.935144397 +0530
+@@ -28,6 +28,9 @@
+ 
+ # TODO: split for archs, move to files?
+ PMX_CONFIG_OPTS= \
++-d CONFIG_ZENIFY \
++-d CONFIG_SCHED_ALT \
++-e CONFIG_SMP \
+ -m INTEL_MEI_WDT \
+ -d CONFIG_SND_PCM_OSS \
+ -e CONFIG_TRANSPARENT_HUGEPAGE_MADVISE \
