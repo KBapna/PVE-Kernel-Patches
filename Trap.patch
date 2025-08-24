@@ -1,0 +1,57 @@
+diff -Naur a/arch/x86/kvm/x86.c b/arch/x86/kvm/x86.c
+--- a/arch/x86/kvm/x86.c	2025-07-29 04:51:17.758118729 +0530
++++ b/arch/x86/kvm/x86.c	2025-07-29 04:54:16.061437914 +0530
+@@ -8891,17 +8891,43 @@
+ 
+ static int kvm_vcpu_do_singlestep(struct kvm_vcpu *vcpu)
+ {
+-	struct kvm_run *kvm_run = vcpu->run;
++    struct kvm_run *kvm_run = vcpu->run;
++    u64 dr6 = 0;
++    unsigned long current_rip = kvm_get_linear_rip(vcpu);
++    bool exit_to_userspace = false;
+ 
+-	if (vcpu->guest_debug & KVM_GUESTDBG_SINGLESTEP) {
+-		kvm_run->debug.arch.dr6 = DR6_BS | DR6_ACTIVE_LOW;
+-		kvm_run->debug.arch.pc = kvm_get_linear_rip(vcpu);
+-		kvm_run->debug.arch.exception = DB_VECTOR;
+-		kvm_run->exit_reason = KVM_EXIT_DEBUG;
+-		return 0;
+-	}
+-	kvm_queue_exception_p(vcpu, DB_VECTOR, DR6_BS);
+-	return 1;
++    // Accumulate DR6 bits for hardware breakpoints
++    if (vcpu->arch.dr7 & DR7_BP_EN_MASK) {
++        dr6 |= kvm_vcpu_check_hw_bp(current_rip, 0, vcpu->arch.dr7, vcpu->arch.db);
++    }
++
++    // Set BS bit if trap flag is active
++    if (static_call(kvm_x86_get_rflags)(vcpu) & X86_EFLAGS_TF) {
++        dr6 |= DR6_BS;
++    }
++
++    // If no debug event recognized, nothing to do
++    if (!dr6)
++        return 1;
++
++    // Force userspace exit for external debuggers or combined TF/BP
++    if ((vcpu->guest_debug & KVM_GUESTDBG_SINGLESTEP) ||
++        (dr6 & DR6_BS && (dr6 & (DR6_B0 | DR6_B1 | DR6_B2 | DR6_B3)))) {
++        exit_to_userspace = true;
++    }
++
++    if (exit_to_userspace) {
++        dr6 |= DR6_ACTIVE_LOW; // KVM's debug exit convention
++        kvm_run->debug.arch.dr6 = dr6;
++        kvm_run->debug.arch.pc = current_rip;
++        kvm_run->debug.arch.exception = DB_VECTOR;
++        kvm_run->exit_reason = KVM_EXIT_DEBUG;
++        return 0; // Handled by KVM_EXIT_DEBUG
++    } else {
++        // Queue exception directly for simple single-step or isolated BP
++        kvm_queue_exception_p(vcpu, DB_VECTOR, dr6);
++        return 1; // Handled by guest exception
++    }
+ }
+ 
+ int kvm_skip_emulated_instruction(struct kvm_vcpu *vcpu)
